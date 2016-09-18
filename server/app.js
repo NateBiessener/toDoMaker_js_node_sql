@@ -62,7 +62,7 @@ app.get('/getAllLists', urlencodedParser, function(req,res){
 });//end getAllLists
 
 //returns all tasks for provided list table
-//expects an object with a list id, returns joined list ordered by priority, then alpha
+//expects list id, returns joined list ordered by complete(false first), then priority ascending
 app.post('/getList', urlencodedParser, function(req,res){
   //------------could maybe be refactored in the future to be a get route. nothing is being changed, just needs the body to receive the list it will be returning
   console.log('in getList');
@@ -72,7 +72,7 @@ app.post('/getList', urlencodedParser, function(req,res){
     }
     else {
       var resultArray = [];
-      var result = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1;', [req.body.id]);
+      var result = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1 ORDER BY complete, priority;', [req.body.id]);
       result.on('row', function(row){
         resultArray.push(row);
       });
@@ -142,6 +142,7 @@ app.put('/editTask', urlencodedParser, function(req, res){
   });//end pg.connect
 });//end /editLine
 
+//expects task id to be deleted
 app.delete('/deleteTask', urlencodedParser, function(req, res){
   console.log('deleteTask url hit');
   //remove line from database
@@ -186,6 +187,7 @@ app.post('/addList', urlencodedParser, function(req, res){
   });//end pg.connect
 });//end /addLine
 
+//expects list id to be deleted
 app.delete('/deleteList', urlencodedParser, function(req, res){
   console.log('deleteList url hit');
   //remove line from database
@@ -206,7 +208,7 @@ app.delete('/deleteList', urlencodedParser, function(req, res){
 //--end list routes
 
 //--start task_list routes
-//expects object with list id and task id, returns that list and all tasks from list
+//expects list_id and task_id, returns that list and all tasks from list
 app.post('/addTaskToList', urlencodedParser, function(req, res){
   console.log('addTaskToList url hit');
   pg.connect(connectionString, function(err, client, done){
@@ -216,7 +218,7 @@ app.post('/addTaskToList', urlencodedParser, function(req, res){
     else {
       client.query('INSERT INTO task_list (task_id, list_id, complete) VALUES ($1, $2, false);', [req.body.task_id, req.body.list_id]);
       var responseArray = [];
-      var responseQuery = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1;', [req.body.list_id]);
+      var responseQuery = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1 ORDER BY complete, priority;', [req.body.list_id]);
       responseQuery.on('row', function(row){
         responseArray.push(row);
       });//end on row
@@ -229,7 +231,7 @@ app.post('/addTaskToList', urlencodedParser, function(req, res){
   });//end pg.connect
 });//end /addTaskToList
 
-//expects object with list id and task id, flips 'complete' value, returns joined row
+//expects list_id and task_id, flips 'complete' value, returns complete value
 app.put('/completeTask', urlencodedParser, function(req,res){
   console.log('in completeTask');
   pg.connect(connectionString, function(err, client, done){
@@ -251,7 +253,7 @@ app.put('/completeTask', urlencodedParser, function(req,res){
   });//end connect
 });//end /completeTask
 
-//expects object with list id and task id, deletes relationship, returns count of relationships for the task so client can call deleteTask if no relationships exist
+//expects list_id and task_id, deletes relationship, returns count of relationships for the task so client can call deleteTask if no relationships exist for the task
 app.delete('/deleteTaskFromList', urlencodedParser, function(req, res){
   console.log('in deleteTaskFromList');
   pg.connect(connectionString, function(err, client, done){
