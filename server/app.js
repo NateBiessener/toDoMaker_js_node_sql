@@ -244,7 +244,27 @@ app.put('/completeTask', urlencodedParser, function(req,res){
 });//end /completeTask
 
 app.delete('/deleteTaskFromList', urlencodedParser, function(req, res){
-  //ADD LOGIC
+  console.log('in deleteTaskFromList');
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      //delete relationship
+      client.query('DELETE FROM task_list WHERE task_list.task_id = $1 AND task_list.list_id = $2;', [req.body.task_id, req.body.list_id]);
+      //return task's relationship count, client can call /deleteTask if count is 0
+      var result = {};
+      var resultQuery = client.query('SELECT COUNT(task_id) FROM task_list WHERE task_list.task_id = $1;', [req.body.task_id]);
+      resultQuery.on('row', function(row){
+        result = row;
+      });
+      resultQuery.on('end', function(){
+        done();
+        console.log('in deleteTaskFromList end, result:', result);
+        return res.json(result);
+      });//end end
+    }//end else
+  });//end connect
 });//end /deleteTaskFromList
 //end task_list routes
 

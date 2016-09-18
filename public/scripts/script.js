@@ -3,6 +3,7 @@ console.log('script sourced');
 $(document).ready(function(){
   console.log('jq');
   $('#addTask').on('click', function(){
+    console.log('in addTask');
     var objectToSend = {
       description: 'test description',
       priority: 5
@@ -18,6 +19,7 @@ $(document).ready(function(){
   });//end addTask onclick
 
   $('#addList').on('click', function(){
+    console.log('in addList');
     var objectToSend = {
       title: 'test title'
     };
@@ -32,6 +34,7 @@ $(document).ready(function(){
   });//end addList onclick
 
   $('#getTasks').on('click', function(){
+    console.log('in getTasks');
     $.ajax({
       url: '/getTasks',
       type: 'GET',
@@ -42,6 +45,7 @@ $(document).ready(function(){
   });// end getTasks onclick
 
   $('#getAllLists').on('click', function(){
+    console.log('in getAllLists');
     $.ajax({
       url: '/getAllLists',
       type: 'GET',
@@ -52,6 +56,7 @@ $(document).ready(function(){
   });// end getAllLists onclick
 
   $('#getList').on('click', function(){
+    console.log('in getList');
     var objectToSend = {
       id: 1 /*-------------TEST VALUE--------------------------*/
     };
@@ -66,6 +71,7 @@ $(document).ready(function(){
   });//end getList
 
   $('#addTaskToList').on('click', function(){
+    console.log('in addTaskToList');
     var objectToSend = {
       task_id: 8, /*-------------TEST VALUE--------------------------*/
       list_id: 1  /*-------------TEST VALUE--------------------------*/
@@ -81,6 +87,7 @@ $(document).ready(function(){
   });//end addTaskToList
 
   $('#completeTask').on('click', function(){
+    console.log('in completeTask');
     var objectToSend = {
       task_id: 8, /*-------------TEST VALUE--------------------------*/
       list_id: 1  /*-------------TEST VALUE--------------------------*/
@@ -94,6 +101,22 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });//end completeTask onclick
+
+  $('#deleteTaskFromList').on('click', function(){
+    console.log('in deleteTaskFromList');
+    var objectToSend = {
+      task_id: 8, /*-------------TEST VALUE--------------------------*/
+      list_id: 1  /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/deleteTaskFromList',
+      type: 'DELETE',
+      data: objectToSend,
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });//end deleteTaskFromList
 });//end doc ready
 
 
