@@ -63,15 +63,33 @@ app.get('/getAllLists', urlencodedParser, function(req,res){
 
 //returns all tasks for provided list table
 //expects an object with a list id, returns joined list ordered by priority, then alpha
-app.get('/getList', urlencodedParser, function(req,res){
-  //ADD LOGIC
-});
+app.post('/getList', urlencodedParser, function(req,res){
+  //------------could maybe be refactored in the future to be a get route. nothing is being changed, just needs the body to receive the list it will be returning
+  console.log('in getList');
+  pg.connect(connectionString, function(err, client, done){
+    if (err) {
+      console.log(err);
+    }
+    else {
+      var resultArray = [];
+      var result = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1;', [req.body.id]);
+      result.on('row', function(row){
+        resultArray.push(row);
+      });
+      result.on('end', function(){
+        done();
+        console.log('in getList end, result:', resultArray);
+        return res.json(resultArray);
+      });//end end
+    }//end else
+  });//end connect
+});//end getList
 //end get routes
 
 //start task routes
 //expects description, priority; returns newly created row
 app.post('/addTask', urlencodedParser, function(req, res){
-  console.log('addTask url hit');
+  console.log('in addTask');
   //add line to database
   pg.connect(connectionString, function(err, client, done){
     if (err){
@@ -139,7 +157,7 @@ app.post('/addTask', urlencodedParser, function(req, res){
 //start list routes
 //expects title; returns newly created list
 app.post('/addList', urlencodedParser, function(req, res){
-  console.log('addList url hit');
+  console.log('in addList');
   //add line to database
   pg.connect(connectionString, function(err, client, done){
     if (err){

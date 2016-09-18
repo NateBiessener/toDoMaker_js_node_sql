@@ -50,6 +50,20 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });// end getAllLists onclick
+
+  $('#getList').on('click', function(){
+    var objectToSend = {
+      id: 1 /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/getList',
+      type: 'POST',
+      data: objectToSend,
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });//end getList
 });//end doc ready
 
 
