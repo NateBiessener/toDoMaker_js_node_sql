@@ -34,14 +34,33 @@ app.get('/getTasks', urlencodedParser, function(req,res){
         done();
         console.log('in getTasks end, results:', resultArray);
         return res.json(resultArray);
-      })
+      });//end end
     }//end else
   });//end connect
-});
+});//end getTasks
+
 //returns all rows from lists table
 app.get('/getAllLists', urlencodedParser, function(req,res){
-  //ADD LOGIC
-});
+  console.log('in getAllLists');
+  pg.connect(connectionString, function(err, client, done){
+    if (err) {
+      console.log(err);
+    }
+    else {
+      var resultArray = [];
+      var results = client.query('SELECT * FROM list');
+      results.on('row', function(row){
+        resultArray.push(row);
+      });
+      results.on('end', function(){
+        done();
+        console.log('in getAllLists end, results:', resultArray);
+        return res.json(resultArray);
+      });//end end
+    }//end else
+  });//end connect
+});//end getAllLists
+
 //returns all tasks for provided list table
 //expects an object with a list id, returns joined list ordered by priority, then alpha
 app.get('/getList', urlencodedParser, function(req,res){

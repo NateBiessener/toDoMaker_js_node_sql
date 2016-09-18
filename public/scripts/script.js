@@ -40,6 +40,16 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });// end getTasks onclick
+
+  $('#getAllLists').on('click', function(){
+    $.ajax({
+      url: '/getAllLists',
+      type: 'GET',
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });// end getAllLists onclick
 });//end doc ready
 
 
