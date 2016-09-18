@@ -79,6 +79,21 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });//end addTaskToList
+
+  $('#completeTask').on('click', function(){
+    var objectToSend = {
+      task_id: 8, /*-------------TEST VALUE--------------------------*/
+      list_id: 1  /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/completeTask',
+      type: 'PUT',
+      data: objectToSend,
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });//end completeTask onclick
 });//end doc ready
 
 

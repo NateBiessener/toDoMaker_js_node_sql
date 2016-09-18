@@ -198,7 +198,7 @@ app.post('/addList', urlencodedParser, function(req, res){
 //end list routes
 
 //start task_list routes
-//expects object with list id and task id, returns list and all tasks from list
+//expects object with list id and task id, returns that list and all tasks from list
 app.post('/addTaskToList', urlencodedParser, function(req, res){
   console.log('addTaskToList url hit');
   pg.connect(connectionString, function(err, client, done){
@@ -214,7 +214,7 @@ app.post('/addTaskToList', urlencodedParser, function(req, res){
       });//end on row
       responseQuery.on('end', function(){
         done();
-        //return added line
+        console.log('in addTaskToList end, response:', responseArray);
         return res.json(responseArray);
       });//end end
     }//end else
@@ -223,7 +223,24 @@ app.post('/addTaskToList', urlencodedParser, function(req, res){
 
 //expects object with list id and task id, flips 'complete' value, returns joined row
 app.put('/completeTask', urlencodedParser, function(req,res){
-  //ADD LOGIC
+  console.log('in completeTask');
+  pg.connect(connectionString, function(err, client, done){
+    if (err) {
+      console.log(err);
+    }
+    else {
+      var response = {};
+      var responseQuery = client.query('UPDATE task_list SET complete = NOT complete WHERE task_id = $1 AND list_id = $2 RETURNING complete;', [req.body.task_id, req.body.list_id]);
+      responseQuery.on('row', function(row){
+        response = row;
+      });
+      responseQuery.on('end', function(){
+        done();
+        console.log('in completeTask end, response:', response);
+        return res.json(response);
+      });//end end
+    }//end else
+  });//end connect
 });//end /completeTask
 
 app.delete('/deleteTaskFromList', urlencodedParser, function(req, res){
