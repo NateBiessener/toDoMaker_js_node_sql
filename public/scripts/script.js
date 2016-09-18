@@ -64,6 +64,21 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });//end getList
+
+  $('#addTaskToList').on('click', function(){
+    var objectToSend = {
+      task_id: 8, /*-------------TEST VALUE--------------------------*/
+      list_id: 1  /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/addTaskToList',
+      type: 'POST',
+      data: objectToSend,
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });//end addTaskToList
 });//end doc ready
 
 

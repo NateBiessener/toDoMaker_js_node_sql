@@ -199,29 +199,27 @@ app.post('/addList', urlencodedParser, function(req, res){
 
 //start task_list routes
 //expects object with list id and task id, returns list and all tasks from list
-// app.post('/addTaskToList', urlencodedParser, function(req, res){
-//   console.log('addTaskToList url hit');
-//   //add line to database
-//   var queryString = 'INSERT INTO task_list (task_id, list_id) VALUES ($1, $2)', [/*$1 $2 TO BE ADDED*/];
-//   pg.connect(connectionString, function(err, client, done){
-//     if (err){
-//       console.log(err);
-//     }
-//     else {
-//       client.query(queryString);
-//       var responseArray = [];
-//       var responseQuery = client.query('SELECT FROM list WHERE id = $1'/*ADD JOIN THING*/, [/*$1 TO BE ADDED*/]);
-//       responseQuery.on('row', function(row){
-//         responseArray.push(row);
-//       });//end on row
-//       responseQuery.on('end', function(){
-//         done();
-//         //return added line
-//         return res.json(responseArray);
-//       });//end end
-//     }//end else
-//   });//end pg.connect
-// });//end /addLine
+app.post('/addTaskToList', urlencodedParser, function(req, res){
+  console.log('addTaskToList url hit');
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      client.query('INSERT INTO task_list (task_id, list_id, complete) VALUES ($1, $2, false);', [req.body.task_id, req.body.list_id]);
+      var responseArray = [];
+      var responseQuery = client.query('SELECT * FROM task JOIN task_list ON task.id = task_list.task_id JOIN list ON task_list.list_id = list.id WHERE list.id = $1;', [req.body.list_id]);
+      responseQuery.on('row', function(row){
+        responseArray.push(row);
+      });//end on row
+      responseQuery.on('end', function(){
+        done();
+        //return added line
+        return res.json(responseArray);
+      });//end end
+    }//end else
+  });//end pg.connect
+});//end /addTaskToList
 
 //expects object with list id and task id, flips 'complete' value, returns joined row
 app.put('/completeTask', urlencodedParser, function(req,res){
