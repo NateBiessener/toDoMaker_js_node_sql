@@ -49,7 +49,7 @@ app.post('/addTask', urlencodedParser, function(req, res){
       });//end on row
       responseQuery.on('end', function(){
         done();
-        console.log('in query end, response:', response);
+        console.log('in addTask end, response:', response);
         //return added line
         return res.json(response);
       });//end end
@@ -101,29 +101,28 @@ app.post('/addTask', urlencodedParser, function(req, res){
 //end task routes
 
 //start list routes
-// app.post('/addList', urlencodedParser, function(req, res){
-//   console.log('addList url hit');
-//   //add line to database
-//   var queryString = 'INSERT INTO list (description, complete, priority) VALUES ($1, $2, $3)', [/*$1 $2 $3 TO BE ADDED*/];
-//   pg.connect(connectionString, function(err, client, done){
-//     if (err){
-//       console.log(err);
-//     }
-//     else {
-//       client.query(queryString);
-//       var responseArray = [];
-//       var responseQuery = client.query('SELECT FROM list WHERE id = $1', [/*$1 TO BE ADDED*/]);
-//       responseQuery.on('row', function(row){
-//         responseArray.push(row);
-//       });//end on row
-//       responseQuery.on('end', function(){
-//         done();
-//         //return added line
-//         return res.json(responseArray);
-//       });//end end
-//     }//end else
-//   });//end pg.connect
-// });//end /addLine
+app.post('/addList', urlencodedParser, function(req, res){
+  console.log('addList url hit');
+  //add line to database
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      var response = {};
+      var responseQuery = client.query('INSERT INTO list (title) VALUES ($1) RETURNING *', [req.body.title]);
+      responseQuery.on('row', function(row){
+        response = row;
+      });//end on row
+      responseQuery.on('end', function(){
+        done();
+        console.log('in /addList end, response:', response);
+        //return added line
+        return res.json(response);
+      });//end end
+    }//end else
+  });//end pg.connect
+});//end /addLine
 
 // app.post('/deleteList', urlencodedParser, function(req, res){
 //   console.log('deleteList url hit');

@@ -16,7 +16,21 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });//end addTask onclick
-})//end doc ready
+
+  $('#addList').on('click', function(){
+    var objectToSend = {
+      title: 'test title'
+    };
+    $.ajax({
+      url: '/addList',
+      type: 'POST',
+      data: objectToSend,
+      success: function(data){
+        console.log('addList success, data:', data);
+      }//end success
+    });//end ajax call
+  });//end addList onclick
+});//end doc ready
 
 
 
