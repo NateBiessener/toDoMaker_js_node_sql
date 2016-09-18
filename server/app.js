@@ -16,7 +16,7 @@ app.get('/', function(req, res){
   res.sendFile(path.resolve('public/index.html'));
 });
 
-//start get routes
+//--start get routes
 //returns all rows from tasks table
 app.get('/getTasks', urlencodedParser, function(req,res){
   console.log('in getTasks');
@@ -84,9 +84,9 @@ app.post('/getList', urlencodedParser, function(req,res){
     }//end else
   });//end connect
 });//end getList
-//end get routes
+//--end get routes
 
-//start task routes
+//--start task routes
 //expects description, priority; returns newly created row
 app.post('/addTask', urlencodedParser, function(req, res){
   console.log('in addTask');
@@ -136,25 +136,26 @@ app.post('/addTask', urlencodedParser, function(req, res){
 //   });//end pg.connect
 // });//end /editLine
 
-// app.post('/deleteTask', urlencodedParser, function(req, res){
-//   console.log('deleteTask url hit');
-//   //remove line from database
-//   var queryString = 'DELETE FROM task WHERE id = $1', [/*$1 TO BE ADDED*/];
-//   pg.connect(connectionString, function(err, client, done){
-//     if (err){
-//       console.log(err);
-//     }
-//     else {
-//       client.query(queryString);
-//       done();
-//       //return success
-//       res.send();
-//     }//end else
-//   });//end pg.connect
-// });// end /deleteLine
-//end task routes
+app.delete('/deleteTask', urlencodedParser, function(req, res){
+  console.log('deleteTask url hit');
+  //remove line from database
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      var resultQuery = client.query('DELETE FROM task WHERE task_id = $1;', [req.body.task_id]);
+      resultQuery.on('end', function(){
+        done();
+        console.log('deleteTask end');
+        res.send();
+      });//end end
+    }//end else
+  });//end pg.connect
+});// end /deleteLine
+//--end task routes
 
-//start list routes
+//--start list routes
 //expects title; returns newly created list
 app.post('/addList', urlencodedParser, function(req, res){
   console.log('in addList');
@@ -179,25 +180,26 @@ app.post('/addList', urlencodedParser, function(req, res){
   });//end pg.connect
 });//end /addLine
 
-// app.post('/deleteList', urlencodedParser, function(req, res){
-//   console.log('deleteList url hit');
-//   //remove line from database
-//   var queryString = 'DELETE FROM list WHERE id = $1', [/*$1 TO BE ADDED*/];
-//   pg.connect(connectionString, function(err, client, done){
-//     if (err){
-//       console.log(err);
-//     }
-//     else {
-//       client.query(queryString);
-//       done();
-//       //return success
-//       res.send();
-//     }//end else
-//   });//end pg.connect
-// });// end /deleteLine
-//end list routes
+app.delete('/deleteList', urlencodedParser, function(req, res){
+  console.log('deleteList url hit');
+  //remove line from database
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      var resultQuery = client.query('DELETE FROM list WHERE id = $1;', [req.body.list_id]);
+      resultQuery.on('end', function(){
+        done();
+        console.log('deleteList end');
+        res.send();
+      });//end end
+    }//end else
+  });//end pg.connect
+});// end /deleteLine
+//--end list routes
 
-//start task_list routes
+//--start task_list routes
 //expects object with list id and task id, returns that list and all tasks from list
 app.post('/addTaskToList', urlencodedParser, function(req, res){
   console.log('addTaskToList url hit');
@@ -243,6 +245,7 @@ app.put('/completeTask', urlencodedParser, function(req,res){
   });//end connect
 });//end /completeTask
 
+//expects object with list id and task id, deletes relationship, returns count of relationships for the task so client can call deleteTask if no relationships exist
 app.delete('/deleteTaskFromList', urlencodedParser, function(req, res){
   console.log('in deleteTaskFromList');
   pg.connect(connectionString, function(err, client, done){
@@ -266,6 +269,6 @@ app.delete('/deleteTaskFromList', urlencodedParser, function(req, res){
     }//end else
   });//end connect
 });//end /deleteTaskFromList
-//end task_list routes
+//--end task_list routes
 
 app.use(express.static('public'));
