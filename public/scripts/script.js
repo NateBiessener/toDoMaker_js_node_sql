@@ -135,6 +135,51 @@ $(document).ready(function(){
     });//end ajax call
   });//end deleteList
 
+  $('#editTask1').on('click', function(){
+    var objectToSend = {
+      id: 6,                          /*-------------TEST VALUE--------------------------*/
+      description: 'new description', /*-------------TEST VALUE--------------------------*/
+      priority: 4                     /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/editTask',
+      type: 'PUT',
+      data: objectToSend,
+      success: function(data){
+        console.log('editTask success');
+      }//end success
+    });//end ajax call
+  });//end editTask
+
+  $('#editTask2').on('click', function(){
+    var objectToSend = {
+      id: 6,                          /*-------------TEST VALUE--------------------------*/
+      description: 'newer description', /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/editTask',
+      type: 'PUT',
+      data: objectToSend,
+      success: function(data){
+        console.log('editTask success');
+      }//end success
+    });//end ajax call
+  });//end editTask
+
+  $('#editTask3').on('click', function(){
+    var objectToSend = {
+      id: 6,                          /*-------------TEST VALUE--------------------------*/
+      priority: 3                     /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: '/editTask',
+      type: 'PUT',
+      data: objectToSend,
+      success: function(data){
+        console.log('editTask success');
+      }//end success
+    });//end ajax call
+  });//end editTask
 });//end doc ready
 
 var delTaskFromDB = function(objectToSend){

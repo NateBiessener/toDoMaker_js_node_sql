@@ -111,30 +111,36 @@ app.post('/addTask', urlencodedParser, function(req, res){
   });//end pg.connect
 });//end /addLine
 
-//expects description and/or priority, updates either/both, returns nothing (script can use /getList on success to update current list on DOM)
-// app.put('/editTask', urlencodedParser, function(req, res){
-//   console.log('editTask url hit');
-//   //change provided propertie/s of line in database
-//   var queryString = 'UPDATE task SET ' + /*THINGS = THINGS*/ 'WHERE id = $1', [/*$1 TO BE ADDED*/];
-//   pg.connect(connectionString, function(err, client, done){
-//     if (err){
-//       console.log(err);
-//     }
-//     else {
-//       client.query(queryString);
-//       var responseArray = [];
-//       var responseQuery = client.query('SELECT FROM task WHERE id = $1', [/*$1 TO BE ADDED*/]);
-//       responseQuery.on('row', function(row){
-//         responseArray.push(row);
-//       });//end on row
-//       responseQuery.on('end', function(){
-//         done();
-//         //return changed line
-//         return res.json(responseArray);
-//       });//end end
-//     }//end else
-//   });//end pg.connect
-// });//end /editLine
+//expects task id, description and/or priority, updates either/both, returns nothing (client can use /getList on success to update current list on DOM)
+app.put('/editTask', urlencodedParser, function(req, res){
+  console.log('editTask url hit');
+  //change provided propertie/s of line in database
+  var queryString = 'UPDATE task SET '
+  if (req.body.description){
+    queryString += `description = '${req.body.description}', `;
+  }
+  if (req.body.priority){
+    queryString += `priority = ${req.body.priority}, `;
+  }
+  //slice off comma from end of queryString
+  queryString = queryString.slice(0, queryString.length - 2) + ` WHERE id = ${req.body.id}`;
+  console.log(queryString);
+  pg.connect(connectionString, function(err, client, done){
+    if (err){
+      console.log(err);
+    }
+    else {
+      client.query(queryString);
+      var responseQuery = client.query(queryString);
+      responseQuery.on('end', function(){
+        done();
+        console.log('in editTask end');
+        //return changed line
+        res.send();
+      });//end end
+    }//end else
+  });//end pg.connect
+});//end /editLine
 
 app.delete('/deleteTask', urlencodedParser, function(req, res){
   console.log('deleteTask url hit');
