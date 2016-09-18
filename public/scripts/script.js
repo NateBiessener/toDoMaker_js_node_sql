@@ -30,6 +30,16 @@ $(document).ready(function(){
       }//end success
     });//end ajax call
   });//end addList onclick
+
+  $('#getTasks').on('click', function(){
+    $.ajax({
+      url: '/getTasks',
+      type: 'GET',
+      success: function(data){
+        console.log(data);
+      }//end success
+    });//end ajax call
+  });// end getTasks onclick
 });//end doc ready
 
 

@@ -19,7 +19,24 @@ app.get('/', function(req, res){
 //start get routes
 //returns all rows from tasks table
 app.get('/getTasks', urlencodedParser, function(req,res){
-  //ADD LOGIC
+  console.log('in getTasks');
+  pg.connect(connectionString, function(err, client, done){
+    if (err) {
+      console.log(err);
+    }
+    else {
+      var resultArray = [];
+      var results = client.query('SELECT * FROM task');
+      results.on('row', function(row){
+        resultArray.push(row);
+      });
+      results.on('end', function(){
+        done();
+        console.log('in getTasks end, results:', resultArray);
+        return res.json(resultArray);
+      })
+    }//end else
+  });//end connect
 });
 //returns all rows from lists table
 app.get('/getAllLists', urlencodedParser, function(req,res){
@@ -101,6 +118,7 @@ app.post('/addTask', urlencodedParser, function(req, res){
 //end task routes
 
 //start list routes
+//expects title; returns newly created list
 app.post('/addList', urlencodedParser, function(req, res){
   console.log('addList url hit');
   //add line to database
