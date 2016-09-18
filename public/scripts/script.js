@@ -73,7 +73,7 @@ $(document).ready(function(){
   $('#addTaskToList').on('click', function(){
     console.log('in addTaskToList');
     var objectToSend = {
-      task_id: 8, /*-------------TEST VALUE--------------------------*/
+      task_id: 7, /*-------------TEST VALUE--------------------------*/
       list_id: 1  /*-------------TEST VALUE--------------------------*/
     };
     $.ajax({
@@ -105,7 +105,7 @@ $(document).ready(function(){
   $('#deleteTaskFromList').on('click', function(){
     console.log('in deleteTaskFromList');
     var objectToSend = {
-      task_id: 8, /*-------------TEST VALUE--------------------------*/
+      task_id: 7, /*-------------TEST VALUE--------------------------*/
       list_id: 1  /*-------------TEST VALUE--------------------------*/
     };
     $.ajax({
@@ -114,12 +114,39 @@ $(document).ready(function(){
       data: objectToSend,
       success: function(data){
         console.log(data);
+        if (data.count === "0"){
+          delTaskFromDB( {task_id: objectToSend.task_id} );
+        }
       }//end success
     });//end ajax call
   });//end deleteTaskFromList
+
+  $('#deleteList').on('click', function(){
+    objectToSend = {
+      list_id: 4 /*-------------TEST VALUE--------------------------*/
+    };
+    $.ajax({
+      url: 'deleteList',
+      type: 'DELETE',
+      data: objectToSend,
+      success: function(data){
+        console.log('deleteList success');
+      }//end success
+    });//end ajax call
+  });//end deleteList
+
 });//end doc ready
 
-
+var delTaskFromDB = function(objectToSend){
+  $.ajax({
+    url: 'deleteTask',
+    type: 'DELETE',
+    data: objectToSend,
+    success: function(data){
+      console.log('deleteTask success');
+    }//end success
+  });//end ajax call
+};
 
 
 

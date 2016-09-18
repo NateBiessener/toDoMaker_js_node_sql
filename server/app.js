@@ -144,7 +144,7 @@ app.delete('/deleteTask', urlencodedParser, function(req, res){
       console.log(err);
     }
     else {
-      var resultQuery = client.query('DELETE FROM task WHERE task_id = $1;', [req.body.task_id]);
+      var resultQuery = client.query('DELETE FROM task WHERE id = $1;', [req.body.task_id]);
       resultQuery.on('end', function(){
         done();
         console.log('deleteTask end');
