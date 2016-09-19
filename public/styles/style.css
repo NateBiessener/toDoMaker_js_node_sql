@@ -7,10 +7,13 @@
 }
 
 .deleteTask, .confirmDeleteTask {
-  text-decoration: none;
   padding: 2px;
   font-size: 10px;
   display: inline-block;
   border: solid 1px black;
   border-radius: 25%;
+}
+
+ins {
+  text-decoration: none;
 }

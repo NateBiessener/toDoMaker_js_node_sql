@@ -9,6 +9,10 @@ var tasks = [];
 //filled on doc load
 var lists = [];
 
+var prioritySelector = '<select id="priorityIn"><option>Select Priority</option><option value=1>NOW!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select>';
+
+var descripIn = '<input class="descripIn" placeholder="Task description">'
+
 var docReady = function(){
 
  return $(document).ready(function(){
@@ -65,54 +69,36 @@ var docReady = function(){
       var objectToSend = {
         id: $(this).data('id')
       };
-      $.ajax({
-        url: '/getList',
-        type: 'POST',
-        data: objectToSend,
-        success: function(data){
-          console.log(data);
-          $('#topDiv').html('<h2 id="listScreenTitle">' + data[0].title + '</h2> <button id="backHome">Home</button>');
-          //build list display
-          var listHTML = '';
-          for (var i = 0; i < data.length; i++) {
-            var itemHTML = '';
-            if (data[i].complete) {
-              itemHTML += '<p class="task complete" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask" checked=true>'
-            }
-            else {
-              itemHTML += '<p class="task" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask">'
-            }
-            itemHTML += data[i].description + ' ';
-            switch (data[i].priority) {
-              case 1:
-                itemHTML += '-- NOW!'
-                break;
-              case 2:
-                itemHTML += '-- Urgent!'
-                break;
-              case 3:
-                itemHTML += '-- Soon'
-                break;
-              case 4:
-                itemHTML += '-- Eventually'
-                break;
-              case 5:
-                itemHTML += '-- Someday'
-                break;
-              default:
-                console.log('in switch default, debug');
-            }//end switch
-            itemHTML += ' <ins class="deleteTask">Erase</ins></p>';
-            listHTML += itemHTML;
-          }//end for
-          $('#listDiv').html(listHTML);
-
-          $('#createDiv').html(
-            '<input id="descripIn" placeholder="Task description"><br><select id="priorityIn"><option>Select Priority</option><option value=1>Now!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select><br><p id="addTaskToList">Add To List</p>'
-          );//end createDiv.html
-        }//end success
-      });//end ajax call
+      showList(objectToSend);
     });//end listTitle onclick
+
+    $('body').on('click', '.taskPriority', function(){
+      var priorityChange = $(prioritySelector).addClass('priorityChange');
+      $(this).replaceWith(priorityChange);
+    });
+
+    $('body').on('change', '.priorityChange', function(){
+      var objectToSend = {
+        id: $(this).parent().data('task_id'),
+        priority: $(this).val()
+      };
+      var list = $(this).parent().data('list_id');
+      editTask(objectToSend).done(showList( {id: list} ));
+    });
+
+    $('body').on('click', '.taskDescription', function(){
+      var descripChange = $(descripIn);
+      $(this).replaceWith(descripIn + '<ins class="descripChange">Submit</ins>');
+    });//end taskDescription onclick
+
+    $('body').on('click', '.descripChange', function(){
+      var objectToSend = {
+        id: $(this).parent().data('task_id'),
+        description: $(this).parent().children('.descripIn').val() || "No Description"
+      };
+      var list = $(this).parent().data('list_id');
+      editTask(objectToSend).done(showList( {id: list} ));
+    });
 
     $('body').on('click', '#addTaskToList', function(){
       console.log('in addTaskToList');
@@ -206,14 +192,7 @@ var docReady = function(){
         description: 'new description', /*-------------TEST VALUE--------------------------*/
         priority: 4                     /*-------------TEST VALUE--------------------------*/
       };
-      $.ajax({
-        url: '/editTask',
-        type: 'PUT',
-        data: objectToSend,
-        success: function(data){
-          console.log('editTask success');
-        }//end success
-      });//end ajax call
+      editTask(objectToSend);
   });//end editTask
   });//end getTasks
 })};//end doc ready
@@ -253,6 +232,64 @@ var displayLists = function(){
     htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' <button class="delList" >Delete this list</button></p>';
   }
   $('#listDiv').html(htmlString);
+};
+
+var showList = function(objectToSend){
+  return $.ajax({
+    url: '/getList',
+    type: 'POST',
+    data: objectToSend,
+    success: function(data){
+      console.log(data);
+      $('#topDiv').html('<h2 id="listScreenTitle">' + data[0].title + '</h2> <button id="backHome">Home</button>');
+      //build list display
+      var listHTML = '';
+      for (var i = 0; i < data.length; i++) {
+        var itemHTML = '';
+        if (data[i].complete) {
+          itemHTML += '<p class="task complete" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask" checked=true>'
+        }
+        else {
+          itemHTML += '<p class="task" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask">'
+        }
+        itemHTML += '<ins class="taskDescription">' + data[i].description + '</ins> ';
+        switch (data[i].priority) {
+          case 1:
+            itemHTML += '<ins class="taskPriority">-- NOW!</ins>'
+            break;
+          case 2:
+            itemHTML += '<ins class="taskPriority">-- Urgent!</ins>'
+            break;
+          case 3:
+            itemHTML += '<ins class="taskPriority">-- Soon</ins>'
+            break;
+          case 4:
+            itemHTML += '<ins class="taskPriority">-- Eventually</ins>'
+            break;
+          case 5:
+            itemHTML += '<ins class="taskPriority">-- Someday</ins>'
+            break;
+          default:
+            console.log('in switch default, debug');
+        }//end switch
+        itemHTML += ' <ins class="deleteTask">Erase</ins></p>';
+        listHTML += itemHTML;
+      }//end for
+      $('#listDiv').html(listHTML);
+      $('#createDiv').html(descripIn + '<br>' + prioritySelector + '<br><p id="addTaskToList">Add To List</p>');
+    }//end success
+  });//end ajax call
+};
+
+var editTask = function(objectToSend){
+  return $.ajax({
+    url: '/editTask',
+    type: 'PUT',
+    data: objectToSend,
+    success: function(data){
+      console.log('editTask success', data);
+    }//end success
+  });//end ajax call
 };
 
 //called in deleteTaskFromList if same task is not in any other list
