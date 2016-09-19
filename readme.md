@@ -1,5 +1,2 @@
-Fullstack JS To-Do app
-======================
-
-* v0.1 project skeleton, confirmed handshakes
-* 
+Fullstack To-Do app using js, jquery, node, psql
+================================================

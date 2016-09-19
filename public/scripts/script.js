@@ -9,9 +9,9 @@ var tasks = [];
 //filled on doc load
 var lists = [];
 
-var prioritySelector = '<select class="priorityIn"><option>Select Priority</option><option value=1>NOW!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select>';
+var prioritySelector = '<select class="priorityIn"><option value="">Select Priority</option><option value=1>NOW!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select>';
 
-var descripIn = '<input class="descripIn" placeholder="Task description">'
+var descripIn = '<input class="descripIn" placeholder="Enter new task">';
 
 $(document).ready(function(){
   console.log('jq');
@@ -61,7 +61,7 @@ $(document).ready(function(){
         priority: $(this).val()
       };
       var list = $(this).parent().data('list_id');
-      editTask(objectToSend).done(showList( {id: list} ));
+      editTask(objectToSend).done(function(){ return showList( {id: list} ) });
     });
 
     $('body').on('click', '.taskDescription', function(){
@@ -75,7 +75,7 @@ $(document).ready(function(){
         description: $(this).parent().children('.descripIn').val() || "No Description"
       };
       var list = $(this).parent().data('list_id');
-      editTask(objectToSend).done(showList( {id: list} ));
+      editTask(objectToSend).done(function(){ return showList( {id: list} ) });
     });
 
     $('body').on('click', '#addTaskToList', function(){
@@ -94,28 +94,22 @@ $(document).ready(function(){
       if (!taskExists){
         var taskToCreate = {
           description: $(this).parent().children('.descripIn').val(),
-          priority: $(this).parent().children('.priorityIn').val()
+          priority: $(this).parent().children('.priorityIn').val()||3
         };
         var newTask = addTask(taskToCreate).done(function(){
           var responseRow = JSON.parse(newTask.responseText);
           addTaskToList({
             task_id: responseRow.id,
             list_id: listID
-          }).done(showList( {id: listID} ));
+          }).done(function(){return showList( {id: listID} ) });
         });
       }
       else {
         addTaskToList({
           task_id: taskID,
           list_id: listID
-        }).done(showList( {id: listID} ));
+        }).done(function(){ return showList( {id: listID} ) });
       }
-      //add task to list, complete default to false
-      var objectToSend = {
-        task_id: 7, /*-------------TEST VALUE--------------------------*/
-        list_id: 1  /*-------------TEST VALUE--------------------------*/
-      };
-
     });//end addTaskToList onclick
 
     $('body').on('click', '#backHome', function(){
@@ -125,19 +119,13 @@ $(document).ready(function(){
     $('body').on('change', '.completeTask', function(){
       console.log('in completeTask');
       $(this).parent().toggleClass('complete');
+      var listID = $(this).parent().data('list_id');
       var objectToSend = {
         task_id: $(this).parent().data('task_id'),
-        list_id: $(this).parent().data('list_id')
+        list_id: listID
       };
       console.log('objectToSend');
-      $.ajax({
-        url: '/completeTask',
-        type: 'PUT',
-        data: objectToSend,
-        success: function(data){
-          console.log(data);
-        }//end success
-      });//end ajax call
+      completeTask(objectToSend).done(function(){ return showList( {id: listID} ) });
     });//end completeTask onclick
 
     $('body').on('click', '.deleteTask', function(){
@@ -181,7 +169,7 @@ $(document).ready(function(){
       });//end ajax call
     });//end deleteList
 
-  });//end getTasks
+  });//end getTasks.done
 });//end doc ready
 
 
@@ -212,14 +200,14 @@ var getAllLists = function(){
 };//end getAllLists
 
 var displayLists = function(){
-  $('#topDiv').html('To Do List Maker');
+  $('#topDiv').html('<h2 class="title">To-Do List Maker 9000</h2><p class="title">Select a list</p>');
   $('#createDiv').html(
-    '<input type="text" placeholder="List Name" id="listIn"> <p id="createList">Create New List</p>'
+    '<input type="text" placeholder="List Name" id="listIn"> <p class="button" id="createList">Create New List</p>'
   );
   var htmlString = '';
   console.log(lists);
   for (var i = 0; i < lists.length; i++) {
-    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' <button class="delList" >Delete this list</button></p>';
+    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' <button class="delList">Delete this list</button></p>';
   }
   $('#listDiv').html(htmlString);
 };
@@ -239,7 +227,7 @@ var showList = function(objectToSend){
     success: function(data){
       console.log(data);
       if (data[0]){
-        $('#topDiv').data('id', id).html('<h2 id="listScreenTitle">' + title + '</h2> <button id="backHome">Home</button>');
+        $('#topDiv').data('id', id).html('<h2 class="title">' + title + '</h2> <button id="backHome">Home</button>');
         //build list display
         var listHTML = '';
         for (var i = 0; i < data.length; i++) {
@@ -270,7 +258,7 @@ var showList = function(objectToSend){
             default:
               console.log('in switch default, debug');
           }//end switch
-          itemHTML += ' <ins class="deleteTask">Erase</ins></p>';
+          itemHTML += ' <ins class="button deleteTask">Erase</ins></p>';
           listHTML += itemHTML;
         }//end for
         $('#listDiv').html(listHTML);
@@ -279,7 +267,7 @@ var showList = function(objectToSend){
         $('#topDiv').data('id', id).html('<h2 id="listScreenTitle">' + title + '</h2> <button id="backHome">Home</button>');
         $('#listDiv').empty();
       }
-      $('#createDiv').html('<p>Add Task</p>' + descripIn + prioritySelector + '<p id="addTaskToList">Add To List</p>');
+      $('#createDiv').html(descripIn + prioritySelector + '<p class="button" id="addTaskToList">Add To List</p>');
     }//end success
   });//end ajax call
 };
@@ -314,11 +302,21 @@ var addTaskToList = function(objectToSend){
     type: 'POST',
     data: objectToSend,
     success: function(data){
-      console.log(data);
+      console.log('relationship added:',data);
     }//end success
   });//end ajax call
 };
 
+var completeTask = function(objectToSend){
+  return $.ajax({
+    url: '/completeTask',
+    type: 'PUT',
+    data: objectToSend,
+    success: function(data){
+      console.log('completeTask success:', data);
+    }//end success
+  });//end ajax call
+};
 //called in deleteTaskFromList if same task is not in any other list
 var delTaskFromDB = function(objectToSend){
   $.ajax({
