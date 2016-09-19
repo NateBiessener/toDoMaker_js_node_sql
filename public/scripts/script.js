@@ -17,167 +17,164 @@ $(document).ready(function(){
   console.log('jq');
   getTasks().done(function(){
     getAllLists().done(displayLists);
-
-    $('body').on('click', '#createList', function(){
-      console.log('in createList');
-      var objectToSend = {
-        title: $('#listIn').val()
-      };
-      $.ajax({
-        url: '/addList',
-        type: 'POST',
-        data: objectToSend,
-        success: function(data){
-          console.log('createList success, data:', data);
-          getAllLists().done(displayLists);
-        }//end success
-      });//end ajax call
-    });//end addList onclick
-
-    $('body').on('click', '.listTitle', function(){
-      //exampleObject = {
-      // complete:false
-      // description:"test description"
-      // priority:5
-      // title:"test title"
-      // list_id:1
-      // task_id:6
-      // };
-      console.log('in listTitle click');
-      var objectToSend = {
-        id: $(this).data('id')
-      };
-      showList(objectToSend);
-    });//end listTitle onclick
-
-    $('body').on('click', '.taskPriority', function(){
-      var priorityChange = $(prioritySelector).addClass('priorityChange');
-      $(this).replaceWith(priorityChange);
-    });
-
-    $('body').on('change', '.priorityChange', function(){
-      var objectToSend = {
-        id: $(this).parent().data('task_id'),
-        priority: $(this).val()
-      };
-      var list = $(this).parent().data('list_id');
-      editTask(objectToSend).done(function(){ return showList( {id: list} ) });
-    });
-
-    $('body').on('click', '.taskDescription', function(){
-      var descripChange = $(descripIn);
-      $(this).replaceWith(descripIn + '<ins class="descripChange">Submit</ins>');
-    });//end taskDescription onclick
-
-    $('body').on('click', '.descripChange', function(){
-      var objectToSend = {
-        id: $(this).parent().data('task_id'),
-        description: $(this).parent().children('.descripIn').val() || "No Description"
-      };
-      var list = $(this).parent().data('list_id');
-      editTask(objectToSend).done(function(){ return showList( {id: list} ) });
-    });
-
-    $('body').on('click', '#addTaskToList', function(){
-      console.log('in addTaskToList');
-      //check for task, if not in db, add to db, store id
-      var listID = $(this).parent().parent().children('#topDiv').data('id');
-      var taskID = -1;
-      var taskExists = false;
-      for (var i = 0; i < tasks.length; i++) {
-        if(tasks[i].description === $(this).parent().children('.descripIn').val()){
-          taskExists = true;
-          taskID = tasks[i].id;
-          break;
-        }
-      }
-      if (!taskExists){
-        var taskToCreate = {
-          description: $(this).parent().children('.descripIn').val(),
-          priority: $(this).parent().children('.priorityIn').val()||3
-        };
-        var newTask = addTask(taskToCreate).done(function(){
-          var responseRow = JSON.parse(newTask.responseText);
-          addTaskToList({
-            task_id: responseRow.id,
-            list_id: listID
-          }).done(function(){return showList( {id: listID} ) });
-        });
-      }
-      else {
-        addTaskToList({
-          task_id: taskID,
-          list_id: listID
-        }).done(function(){ return showList( {id: listID} ) });
-      }
-    });//end addTaskToList onclick
-
-    $('body').on('click', '#backHome', function(){
-      getAllLists().done(displayLists);
-    })
-
-    $('body').on('change', '.completeTask', function(){
-      console.log('in completeTask');
-      $(this).parent().toggleClass('complete');
-      var listID = $(this).parent().data('list_id');
-      var objectToSend = {
-        task_id: $(this).parent().data('task_id'),
-        list_id: listID
-      };
-      console.log('objectToSend');
-      completeTask(objectToSend).done(function(){ return showList( {id: listID} ) });
-    });//end completeTask onclick
-
-    $('body').on('click', '.deleteTask', function(){
-      $(this).html('Are you sure?');
-      $(this).removeClass('deleteTask');
-      $(this).addClass('confirmDeleteTask');
-    });
-
-    $('body').on('click', '.confirmDeleteTask', function(){
-      console.log('in deleteTaskFromList');
-      var objectToSend = {
-        task_id: $(this).parent().data('task_id'),
-        list_id: $(this).parent().data('list_id')
-      };
-      $(this).parent().remove();
-      $.ajax({
-        url: '/deleteTaskFromList',
-        type: 'DELETE',
-        data: objectToSend,
-        success: function(data){
-          console.log(data);
-          if (data.count === "0"){
-            delTaskFromDB( {task_id: objectToSend.task_id} );
-          }
-        }//end success
-      });//end ajax call
-    });//end deleteTaskFromList
-
-    $('body').on('click', '.delList', function(){
-      $(this).html('Are you sure?');
-      $(this).removeClass('delList');
-      $(this).addClass('confirmDeleteList');
-    });//end deleteList
-
-    $('body').on('click', '.confirmDeleteList', function(){
-      objectToSend = {
-        list_id: $(this).parent().children('.listTitle').data('id')
-      };
-      console.log(objectToSend);
-      var that = $(this);
-      $.ajax({
-        url: 'deleteList',
-        type: 'DELETE',
-        data: objectToSend,
-        success: function(data){
-          console.log('deleteList success');
-          getAllLists().done(displayLists);
-        }//end success
-      });//end ajax call
-    });//end confirmDeleteList
-
   });//end getTasks.done
+  $('body').on('click', '#createList', function(){
+    console.log('in createList');
+    var objectToSend = {
+      title: $('#listIn').val()
+    };
+    $.ajax({
+      url: '/addList',
+      type: 'POST',
+      data: objectToSend,
+      success: function(data){
+        console.log('createList success, data:', data);
+        getAllLists().done(displayLists);
+      }//end success
+    });//end ajax call
+  });//end addList onclick
+
+  $('body').on('click', '.listTitle', function(){
+    //exampleObject = {
+    // complete:false
+    // description:"test description"
+    // priority:5
+    // title:"test title"
+    // list_id:1
+    // task_id:6
+    // };
+    console.log('in listTitle click');
+    var objectToSend = {
+      id: $(this).data('id')
+    };
+    showList(objectToSend);
+  });//end listTitle onclick
+
+  $('body').on('click', '.taskPriority', function(){
+    var priorityChange = $(prioritySelector).addClass('priorityChange');
+    $(this).replaceWith(priorityChange);
+  });
+
+  $('body').on('change', '.priorityChange', function(){
+    var objectToSend = {
+      id: $(this).parent().data('task_id'),
+      priority: $(this).val()
+    };
+    var list = $(this).parent().data('list_id');
+    editTask(objectToSend).done(function(){ return showList( {id: list} ) });
+  });
+
+  $('body').on('click', '.taskDescription', function(){
+    var descripChange = $(descripIn);
+    $(this).replaceWith(descripIn + '<ins class="descripChange">Submit</ins>');
+  });//end taskDescription onclick
+
+  $('body').on('click', '.descripChange', function(){
+    var objectToSend = {
+      id: $(this).parent().data('task_id'),
+      description: $(this).parent().children('.descripIn').val() || "No Description"
+    };
+    var list = $(this).parent().data('list_id');
+    editTask(objectToSend).done(function(){ return showList( {id: list} ) });
+  });
+
+  $('body').on('click', '#addTaskToList', function(){
+    console.log('in addTaskToList');
+    //check for task, if not in db, add to db, store id
+    var listID = $(this).parent().parent().children('#topDiv').data('id');
+    var taskID = -1;
+    var taskExists = false;
+    for (var i = 0; i < tasks.length; i++) {
+      if(tasks[i].description === $(this).parent().children('.descripIn').val()){
+        taskExists = true;
+        taskID = tasks[i].id;
+        break;
+      }
+    }
+    if (!taskExists){
+      var taskToCreate = {
+        description: $(this).parent().children('.descripIn').val(),
+        priority: $(this).parent().children('.priorityIn').val()||3
+      };
+      var newTask = addTask(taskToCreate).done(function(){
+        var responseRow = JSON.parse(newTask.responseText);
+        addTaskToList({
+          task_id: responseRow.id,
+          list_id: listID
+        }).done(function(){return showList( {id: listID} ) });
+      });
+    }
+    else {
+      addTaskToList({
+        task_id: taskID,
+        list_id: listID
+      }).done(function(){ return showList( {id: listID} ) });
+    }
+  });//end addTaskToList onclick
+
+  $('body').on('click', '#backHome', function(){
+    getAllLists().done(displayLists);
+  })
+
+  $('body').on('change', '.completeTask', function(){
+    console.log('in completeTask');
+    $(this).parent().toggleClass('complete');
+    var listID = $(this).parent().data('list_id');
+    var objectToSend = {
+      task_id: $(this).parent().data('task_id'),
+      list_id: listID
+    };
+    console.log('objectToSend');
+    completeTask(objectToSend).done(function(){ return showList( {id: listID} ) });
+  });//end completeTask onclick
+
+  $('body').on('click', '.deleteTask', function(){
+    $(this).html('Are you sure?');
+    $(this).removeClass('deleteTask');
+    $(this).addClass('confirmDeleteTask');
+  });
+
+  $('body').on('click', '.confirmDeleteTask', function(){
+    console.log('in deleteTaskFromList');
+    var objectToSend = {
+      task_id: $(this).parent().data('task_id'),
+      list_id: $(this).parent().data('list_id')
+    };
+    $(this).parent().remove();
+    $.ajax({
+      url: '/deleteTaskFromList',
+      type: 'DELETE',
+      data: objectToSend,
+      success: function(data){
+        console.log(data);
+        if (data.count === "0"){
+          delTaskFromDB( {task_id: objectToSend.task_id} );
+        }
+      }//end success
+    });//end ajax call
+  });//end deleteTaskFromList
+
+  $('body').on('click', '.delList', function(){
+    $(this).html('Are you sure?');
+    $(this).removeClass('delList');
+    $(this).addClass('confirmDeleteList');
+  });//end deleteList
+
+  $('body').on('click', '.confirmDeleteList', function(){
+    objectToSend = {
+      list_id: $(this).data('id')
+    };
+    console.log(objectToSend);
+    $.ajax({
+      url: 'deleteList',
+      type: 'DELETE',
+      data: objectToSend,
+      success: function(data){
+        console.log('deleteList success');
+        getAllLists().done(displayLists);
+      }//end success
+    });//end ajax call
+  });//end confirmDeleteList
 });//end doc ready
 
 
@@ -215,7 +212,7 @@ var displayLists = function(){
   var htmlString = '';
   console.log(lists);
   for (var i = 0; i < lists.length; i++) {
-    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' </p><p class="button delList">Delete this list</p><br>';
+    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' </p><p class="button delList" data-id="' + lists[i].id + '">Delete this list</p><br>';
   }
   $('#listDiv').html(htmlString);
 };
