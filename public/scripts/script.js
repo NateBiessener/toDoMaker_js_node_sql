@@ -9,36 +9,14 @@ var tasks = [];
 //filled on doc load
 var lists = [];
 
-var prioritySelector = '<select id="priorityIn"><option>Select Priority</option><option value=1>NOW!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select>';
+var prioritySelector = '<select class="priorityIn"><option>Select Priority</option><option value=1>NOW!</option><option value=2>Urgent!</option><option value=3>Soon</option><option value=4>Eventually</option><option value=5>Someday</option></select>';
 
 var descripIn = '<input class="descripIn" placeholder="Task description">'
 
-var docReady = function(){
-
- return $(document).ready(function(){
+$(document).ready(function(){
   console.log('jq');
-  $('#topDiv').html('To Do List Maker');
   getTasks().done(function(){
-    $('#createDiv').html(
-      '<input type="text" placeholder="List Name" id="listIn"> <p id="createList">Create New List</p>'
-    );
     getAllLists().done(displayLists);
-
-    $('#addTask').on('click', function(){
-      console.log('in addTask');
-      var objectToSend = {
-        description: 'test description',
-        priority: 5
-      };
-      $.ajax({
-        url: '/addTask',
-        type: 'POST',
-        data: objectToSend,
-        success: function(data){
-          console.log('addTask success, data:', data);
-        }//end success
-      });//end ajax call
-    });//end addTask onclick
 
     $('body').on('click', '#createList', function(){
       console.log('in createList');
@@ -103,28 +81,45 @@ var docReady = function(){
     $('body').on('click', '#addTaskToList', function(){
       console.log('in addTaskToList');
       //check for task, if not in db, add to db, store id
-
+      var listID = $(this).parent().parent().children('#topDiv').data('id');
+      var taskID = -1;
+      var taskExists = false;
+      for (var i = 0; i < tasks.length; i++) {
+        if(tasks[i].description === $(this).parent().children('.descripIn').val()){
+          taskExists = true;
+          taskID = tasks[i].id;
+          break;
+        }
+      }
+      if (!taskExists){
+        var taskToCreate = {
+          description: $(this).parent().children('.descripIn').val(),
+          priority: $(this).parent().children('.priorityIn').val()
+        };
+        var newTask = addTask(taskToCreate).done(function(){
+          var responseRow = JSON.parse(newTask.responseText);
+          addTaskToList({
+            task_id: responseRow.id,
+            list_id: listID
+          }).done(showList( {id: listID} ));
+        });
+      }
+      else {
+        addTaskToList({
+          task_id: taskID,
+          list_id: listID
+        }).done(showList( {id: listID} ));
+      }
       //add task to list, complete default to false
       var objectToSend = {
         task_id: 7, /*-------------TEST VALUE--------------------------*/
         list_id: 1  /*-------------TEST VALUE--------------------------*/
       };
-      $.ajax({
-        url: '/addTaskToList',
-        type: 'POST',
-        data: objectToSend,
-        success: function(data){
-          console.log(data);
-        }//end success
-      });//end ajax call
-    });//end addTaskToList
 
-    // $('body').on('click', '.task', function(){
-    //   console.log('task id:', $(this).data('task_id'), 'list id:', $(this).data('list_id'));
-    // });
+    });//end addTaskToList onclick
 
     $('body').on('click', '#backHome', function(){
-      docReady();
+      getAllLists().done(displayLists);
     })
 
     $('body').on('change', '.completeTask', function(){
@@ -186,18 +181,9 @@ var docReady = function(){
       });//end ajax call
     });//end deleteList
 
-    $('#editTask').on('click', function(){
-      var objectToSend = {
-        id: 6,                          /*-------------TEST VALUE--------------------------*/
-        description: 'new description', /*-------------TEST VALUE--------------------------*/
-        priority: 4                     /*-------------TEST VALUE--------------------------*/
-      };
-      editTask(objectToSend);
-  });//end editTask
   });//end getTasks
-})};//end doc ready
+});//end doc ready
 
-docReady();
 
 //puts all tasks from db into tasks array
 var getTasks = function(){
@@ -226,6 +212,10 @@ var getAllLists = function(){
 };//end getAllLists
 
 var displayLists = function(){
+  $('#topDiv').html('To Do List Maker');
+  $('#createDiv').html(
+    '<input type="text" placeholder="List Name" id="listIn"> <p id="createList">Create New List</p>'
+  );
   var htmlString = '';
   console.log(lists);
   for (var i = 0; i < lists.length; i++) {
@@ -235,48 +225,73 @@ var displayLists = function(){
 };
 
 var showList = function(objectToSend){
+  var title = '';
+  var id = objectToSend.id;
+  for (var i = 0; i < lists.length; i++) {
+    if(objectToSend.id == lists[i].id){
+      title = lists[i].title;
+    }
+  }
   return $.ajax({
     url: '/getList',
     type: 'POST',
     data: objectToSend,
     success: function(data){
       console.log(data);
-      $('#topDiv').html('<h2 id="listScreenTitle">' + data[0].title + '</h2> <button id="backHome">Home</button>');
-      //build list display
-      var listHTML = '';
-      for (var i = 0; i < data.length; i++) {
-        var itemHTML = '';
-        if (data[i].complete) {
-          itemHTML += '<p class="task complete" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask" checked=true>'
-        }
-        else {
-          itemHTML += '<p class="task" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask">'
-        }
-        itemHTML += '<ins class="taskDescription">' + data[i].description + '</ins> ';
-        switch (data[i].priority) {
-          case 1:
-            itemHTML += '<ins class="taskPriority">-- NOW!</ins>'
-            break;
-          case 2:
-            itemHTML += '<ins class="taskPriority">-- Urgent!</ins>'
-            break;
-          case 3:
-            itemHTML += '<ins class="taskPriority">-- Soon</ins>'
-            break;
-          case 4:
-            itemHTML += '<ins class="taskPriority">-- Eventually</ins>'
-            break;
-          case 5:
-            itemHTML += '<ins class="taskPriority">-- Someday</ins>'
-            break;
-          default:
-            console.log('in switch default, debug');
-        }//end switch
-        itemHTML += ' <ins class="deleteTask">Erase</ins></p>';
-        listHTML += itemHTML;
-      }//end for
-      $('#listDiv').html(listHTML);
-      $('#createDiv').html(descripIn + '<br>' + prioritySelector + '<br><p id="addTaskToList">Add To List</p>');
+      if (data[0]){
+        $('#topDiv').data('id', id).html('<h2 id="listScreenTitle">' + title + '</h2> <button id="backHome">Home</button>');
+        //build list display
+        var listHTML = '';
+        for (var i = 0; i < data.length; i++) {
+          var itemHTML = '';
+          if (data[i].complete) {
+            itemHTML += '<p class="task complete" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask" checked=true>'
+          }
+          else {
+            itemHTML += '<p class="task" data-list_id="' + data[i].list_id + '" data-task_id="' + data[i].task_id + '"><input type="checkbox" class="completeTask">'
+          }
+          itemHTML += '<ins class="taskDescription">' + data[i].description + '</ins> ';
+          switch (data[i].priority) {
+            case 1:
+              itemHTML += '<ins class="taskPriority">-- NOW!</ins>'
+              break;
+            case 2:
+              itemHTML += '<ins class="taskPriority">-- Urgent!</ins>'
+              break;
+            case 3:
+              itemHTML += '<ins class="taskPriority">-- Soon</ins>'
+              break;
+            case 4:
+              itemHTML += '<ins class="taskPriority">-- Eventually</ins>'
+              break;
+            case 5:
+              itemHTML += '<ins class="taskPriority">-- Someday</ins>'
+              break;
+            default:
+              console.log('in switch default, debug');
+          }//end switch
+          itemHTML += ' <ins class="deleteTask">Erase</ins></p>';
+          listHTML += itemHTML;
+        }//end for
+        $('#listDiv').html(listHTML);
+      }//end if data[0]
+      else {
+        $('#topDiv').data('id', id).html('<h2 id="listScreenTitle">' + title + '</h2> <button id="backHome">Home</button>');
+        $('#listDiv').empty();
+      }
+      $('#createDiv').html('<p>Add Task</p>' + descripIn + prioritySelector + '<p id="addTaskToList">Add To List</p>');
+    }//end success
+  });//end ajax call
+};
+
+var addTask = function(objectToSend){
+  return $.ajax({
+    url: '/addTask',
+    type: 'POST',
+    data: objectToSend,
+    success: function(data){
+      console.log(data);
+      return data;
     }//end success
   });//end ajax call
 };
@@ -288,6 +303,18 @@ var editTask = function(objectToSend){
     data: objectToSend,
     success: function(data){
       console.log('editTask success', data);
+    }//end success
+  });//end ajax call
+};
+
+var addTaskToList = function(objectToSend){
+  console.log(objectToSend);
+  return $.ajax({
+    url: '/addTaskToList',
+    type: 'POST',
+    data: objectToSend,
+    success: function(data){
+      console.log(data);
     }//end success
   });//end ajax call
 };
