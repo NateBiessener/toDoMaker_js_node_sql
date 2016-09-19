@@ -2,7 +2,7 @@ html {
   background-color: #bbb;
 }
 
-#createList {
+#createList, .listTitle {
   display: inline;
 }
 
@@ -10,7 +10,7 @@ html {
   text-decoration: line-through;
 }
 
-.deleteTask, .confirmDeleteTask {
+.deleteTask, .confirmDeleteTask, .delList, .confirmDeleteList {
   font-size: 10px;
 }
 

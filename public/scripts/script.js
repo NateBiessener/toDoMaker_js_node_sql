@@ -155,19 +155,27 @@ $(document).ready(function(){
     });//end deleteTaskFromList
 
     $('body').on('click', '.delList', function(){
+      $(this).html('Are you sure?');
+      $(this).removeClass('delList');
+      $(this).addClass('confirmDeleteList');
+    });//end deleteList
+
+    $('body').on('click', '.confirmDeleteList', function(){
       objectToSend = {
-        list_id: $(this).parent().data('id')
+        list_id: $(this).parent().children('.listTitle').data('id')
       };
       console.log(objectToSend);
+      var that = $(this);
       $.ajax({
         url: 'deleteList',
         type: 'DELETE',
         data: objectToSend,
         success: function(data){
           console.log('deleteList success');
+          getAllLists().done(displayLists);
         }//end success
       });//end ajax call
-    });//end deleteList
+    });//end confirmDeleteList
 
   });//end getTasks.done
 });//end doc ready
@@ -207,7 +215,7 @@ var displayLists = function(){
   var htmlString = '';
   console.log(lists);
   for (var i = 0; i < lists.length; i++) {
-    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' <button class="delList">Delete this list</button></p>';
+    htmlString += '<p class="listTitle" data-id="' + lists[i].id + '">' + lists[i].title + ' </p><p class="button delList">Delete this list</p><br>';
   }
   $('#listDiv').html(htmlString);
 };
