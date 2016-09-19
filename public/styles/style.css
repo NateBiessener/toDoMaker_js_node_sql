@@ -1,0 +1,16 @@
+#createList {
+  display: inline;
+}
+
+.complete {
+  text-decoration: line-through;
+}
+
+.deleteTask, .confirmDeleteTask {
+  text-decoration: none;
+  padding: 2px;
+  font-size: 10px;
+  display: inline-block;
+  border: solid 1px black;
+  border-radius: 25%;
+}
