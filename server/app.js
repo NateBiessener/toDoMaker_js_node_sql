@@ -7,8 +7,10 @@ var path = require('path');
 
 var connectionString = 'postgres://localhost:5432/todo';
 
-app.listen('3040', function(){
-  console.log('listening on 3040');
+var port = process.env.PORT || 3040;
+
+app.listen(port, function(){
+  console.log('listening on', port);
 });
 
 app.get('/', function(req, res){
