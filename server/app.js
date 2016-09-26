@@ -5,7 +5,7 @@ var urlencodedParser = bodyParser.urlencoded({extended: false});
 var pg = require('pg');
 var path = require('path');
 
-var connectionString = 'postgres://localhost:5432/todo';
+var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/todo';
 
 var port = process.env.PORT || 3040;
 
