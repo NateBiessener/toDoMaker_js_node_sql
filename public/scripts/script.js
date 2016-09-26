@@ -157,14 +157,31 @@ $(document).ready(function(){
     console.log(objectToSend);
     //!!!------------SOMEHOW CALL delTasks on all tasks in list first
     $.ajax({
-      url: 'deleteList',
-      type: 'DELETE',
-      data: objectToSend,
+      url: '/getList',
+      type: 'POST',
+      data: {id: objectToSend.list_id},
       success: function(data){
-        console.log('deleteList success');
-        getAllLists().done(displayLists);
+        console.log(data);
+        for (var i = 0; i < data.length; i++) {
+          var taskToDelete = {
+            task_id: data[i].task_id,
+            list_id: data[i].list_id
+          };
+          console.log(taskToDelete);
+          delTask(taskToDelete);
+        }//end for
       }//end success
-    });//end ajax call
+    }).done(function(){
+      return $.ajax({
+        url: 'deleteList',
+        type: 'DELETE',
+        data: objectToSend,
+        success: function(data){
+          console.log('deleteList success');
+          getAllLists().done(displayLists);
+        }//end success
+      });//end ajax call
+    });//end done
   });//end confirmDeleteList
 });//end doc ready
 
