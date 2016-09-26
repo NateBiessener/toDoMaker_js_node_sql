@@ -141,17 +141,7 @@ $(document).ready(function(){
       list_id: $(this).parent().data('list_id')
     };
     $(this).parent().remove();
-    $.ajax({
-      url: '/deleteTaskFromList',
-      type: 'DELETE',
-      data: objectToSend,
-      success: function(data){
-        console.log(data);
-        if (data.count === "0"){
-          delTaskFromDB( {task_id: objectToSend.task_id} );
-        }
-      }//end success
-    });//end ajax call
+    delTask(objectToSend);
   });//end deleteTaskFromList
 
   $('body').on('click', '.delList', function(){
@@ -165,6 +155,7 @@ $(document).ready(function(){
       list_id: $(this).data('id')
     };
     console.log(objectToSend);
+    //!!!------------SOMEHOW CALL delTasks on all tasks in list first
     $.ajax({
       url: 'deleteList',
       type: 'DELETE',
@@ -177,6 +168,19 @@ $(document).ready(function(){
   });//end confirmDeleteList
 });//end doc ready
 
+var delTask = function(objectToSend){
+  return $.ajax({
+    url: '/deleteTaskFromList',
+    type: 'DELETE',
+    data: objectToSend,
+    success: function(data){
+      console.log(data);
+      if (data.count === "0"){
+        delTaskFromDB( {task_id: objectToSend.task_id} );
+      }
+    }//end success
+  });//end ajax call
+};
 
 //puts all tasks from db into tasks array
 var getTasks = function(){
